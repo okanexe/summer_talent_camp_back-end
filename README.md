@@ -11,25 +11,25 @@ Candidates collection stores some required information of Candidates.
 A candidate is defined as follows:
 
 <i><b>_id string:</b></i> Unique hash that identifies candidate.<br/>
-<i>first_name string:</i> First name of the candidate.<br/>
-last_name string: Last name of the candidate.<br/>
-email string: Contact email of candidate.<br/>
-department string: Department that candidate applied.
-Available values are
--Marketing
--Design
--Development
-university string: University of the candidate.
-experience boolean: Candidate has previous working experience or not.
-status string: Status of the candidate.
-Available values are
--Pending
--In Progress
--Denied
--Accepted
-meeting_count int: The order of the next meeting. The maximum meeting count is 4.
-next_meeting DateTime: Timestamp of the next meeting between the Otsimo team and the candidate.
-assignee string: The id of the Otsimo team member who is responsible for this candidate.
+<i><b>first_name string:</b></i> First name of the candidate.<br/>
+<i><b>last_name string:</b></i> Last name of the candidate.<br/>
+<i><b>email string:</b></i> Contact email of candidate.<br/>
+<i><b>department string:</b></i> Department that candidate applied.<br/>
+Available values are<br/>
+-Marketing<br/>
+-Design<br/>
+-Development<br/>
+<i><b>university string:</b></i> University of the candidate.<br/>
+<i><b>experience boolean:</b></i> Candidate has previous working experience or not.<br/>
+<i><b>status string:</b></i> Status of the candidate.<br/>
+Available values are<br/>
+-Pending<br/>
+-In Progress<br/>
+-Denied<br/>
+-Accepted<br/>
+<i><b>meeting_count int:</b></i> The order of the next meeting. The maximum meeting count is 4.<br/>
+<i><b>next_meeting DateTime:</b></i> Timestamp of the next meeting between the Otsimo team and the candidate.<br/>
+<i><b>assignee string:</b></i> The id of the Otsimo team member who is responsible for this candidate.<br/>
 
 Collection Assignees stores some required information relating to the Assignees. Assignee means a team member of Otsimo who is responsible for their own team's summer interns.
 
