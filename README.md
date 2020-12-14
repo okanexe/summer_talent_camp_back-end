@@ -1,16 +1,16 @@
 ### Otsimo Summer Talent Camp Project
 
-Project Description
+## Project Description
 At Otsimo, we want to start a project called the Summer Talent Camp. At the beginning of the process, the 4th year university students from different departments will apply to the camp. After the selection progress, the interns will be given a task to work on during their internship. Among these interns, some will be hired as full-time team members at the end of the summer. To make the selection process simpler for the team, we would like to develop a platform that provides a way to manage candidates, their applications, and appointments relating to them easily and quickly. On this platform, the assigned team member will be able to quickly assess the candidates and see if there is anything that needs their attention. They will be able to accept or reject the application, find out if they have any appointments with the applicants, etc. As a developer, you will code the functions related to the database. We will use MongoDB as a database and GO as the programming language. All the details, rules are written below and an example DB dump (dumped with mongo 3.6 with this command mongodump --host localhost:27018 --archive=dump.gz --gzip --db Otsimo) is attached in description.
 
-Technical Details
+## Technical Details
 
 ## Objects
 As you can check it from example DB we have two collections called Candidates and Assignees.
 Candidates collection stores some required information of Candidates.
 A candidate is defined as follows:
 
-_id string: Unique hash that identifies candidate.
+<i>_id string:</i> Unique hash that identifies candidate.
 first_name string: First name of the candidate.
 last_name string: Last name of the candidate.
 email string: Contact email of candidate.
@@ -43,7 +43,7 @@ Available values are
 -Design
 -Development
 
-Function Signatures
+## Function Signatures
 
 The required storage functions are listed below with signatures.
 
@@ -56,7 +56,7 @@ DenyCandidate (_id string) error
 AcceptCandidate(_id string) error
 FindAssigneeIDByName (name string) string
 
-Requirements
+## Requirements
 
 Each candidate should have a unique identifier.
 
