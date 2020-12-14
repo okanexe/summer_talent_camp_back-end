@@ -10,7 +10,7 @@ As you can check it from example DB we have two collections called Candidates an
 Candidates collection stores some required information of Candidates.
 A candidate is defined as follows:
 
-<i>_id string:</i> Unique hash that identifies candidate.<br/>
+<i><b>_id string:</b></i> Unique hash that identifies candidate.<br/>
 <i>first_name string:</i> First name of the candidate.<br/>
 last_name string: Last name of the candidate.<br/>
 email string: Contact email of candidate.<br/>
