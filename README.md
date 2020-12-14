@@ -35,25 +35,25 @@ Collection Assignees stores some required information relating to the Assignees.
 
 An assignee is defined as follows:
 
-_id string: Unique hash that identifies an assignee.
-name string: Name of the assignee.
-department string: Department that assignee works in the Otsimo.
-Available values are
--Marketing
--Design
--Development
+<i><b>_id string:</b></i> Unique hash that identifies an assignee.<br/>
+<i><b>name string:</b></i> Name of the assignee.<br/>
+<i><b>department string:</b></i> Department that assignee works in the Otsimo.<br/>
+Available values are<br/>
+-Marketing<br/>
+-Design<br/>
+-Development<br/>
 
 ## Function Signatures
 
 The required storage functions are listed below with signatures.
 
-CreateCandidate (candidate Candidate) (Candidate, error)
-ReadCandidate (_id string) (Candidate, error)
-DeleteCandidate (_id string) error
-ArrangeMeeting (_id string, nextMeetingTime *time.Time) error
-CompleteMeeting (_id string) error
-DenyCandidate (_id string) error
-AcceptCandidate(_id string) error
+CreateCandidate (candidate Candidate) (Candidate, error)<br/>
+ReadCandidate (_id string) (Candidate, error)<br/>
+DeleteCandidate (_id string) error<br/>
+ArrangeMeeting (_id string, nextMeetingTime *time.Time) error<br/>
+CompleteMeeting (_id string) error<br/>
+DenyCandidate (_id string) error<br/>
+AcceptCandidate(_id string) error<br/>
 FindAssigneeIDByName (name string) string
 
 ## Requirements
