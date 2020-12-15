@@ -56,8 +56,8 @@ func main() {
 		department: "Design",
 		university: "ODTU",
 		experience: true,
-	}*/
-	/*sonuc, err := CreateCandidate(aday)
+	}
+	sonuc, err := CreateCandidate(aday)
 
 	if err != nil {
 		fmt.Println(err)
@@ -65,17 +65,20 @@ func main() {
 		fmt.Println(sonuc.first_name, " ", sonuc.last_name, " ", sonuc.assignee)
 	}*/
 
-	/*adayım, err := ReadCandidate("5b75860151d9590001def625")
+	/*adayım, err := ReadCandidate("5b758c7d51d9590001def631")
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(adayım.first_name, " ", adayım.last_name, " ", adayım.assignee)
 	}*/
 
-	//completeMeeting("5b75860151d9590001def625")
-	//DeleteCandidate("5fd727ce9b369b6ed6ee5d6c")
+	//fmt.Println(completeMeeting("5b758c7d51d9590001def631"))
+	//DeleteCandidate("5fd87b4c06fbdac6461d6cc1")
 	//FindAssigneeIDByName("Zafeer")
-	fmt.Println(FindAssigneeIDByName("Mehmeti"))
+	//fmt.Println(FindAssigneeIDByName("Mehmet"))
+	//fmt.Println(AcceptCandidate("5b7587a351d9590001def628"))
+	/*time := time.Now()
+	ArrangeMeeting("5fd89ef18e7ad22fb1c03438", &time)*/
 
 	//fmt.Println(sonuc.first_name)
 }
@@ -120,7 +123,7 @@ type Assignee struct {
 // candidate to correctly insert database.
 func CreateCandidate(candidate Candidate) (Candidate, error) {
 
-	// başlangıç mmeting_count=0 olacak unutma
+	// define candidate to insert database
 	cand := Candidate{
 		_id:           primitive.NewObjectID().Hex(),
 		first_name:    candidate.first_name,
@@ -170,23 +173,11 @@ func CreateCandidate(candidate Candidate) (Candidate, error) {
 	}
 
 	departments := [3]string{"Marketing", "Design", "Development"}
-	//statuses := [4]string{"Pending", "In Progress", "Denied", "Accepted"}
 
 	//check departments for correctly
 	for _, b := range departments {
 		if b == cand.department {
-			client, err := mongo.NewClient(options.Client().ApplyURI(
-				"mongodb://localhost:27017"))
-			if err != nil {
-				log.Fatal(err)
-			}
-			ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-			err = client.Connect(ctx)
-			if err != nil {
-				log.Fatal(err)
-			}
-			// fetch data from database
-			collection := client.Database("Otsimo").Collection("Candidates")
+			collection, ctx := connectDbToCollection("Candidates")
 			candidateResult, err := collection.InsertOne(ctx, bson.D{
 				{"_id", cand._id},
 				{"first_name", cand.first_name},
@@ -200,7 +191,7 @@ func CreateCandidate(candidate Candidate) (Candidate, error) {
 				{"assignee", cand.assignee},
 			})
 			fmt.Println(candidateResult.InsertedID)
-			return cand, nil
+			return cand, err
 		}
 	}
 	return cand, errors.New("invalid department")
@@ -211,37 +202,28 @@ func CreateCandidate(candidate Candidate) (Candidate, error) {
 // and check if there is any error.
 func ReadCandidate(_id string) (Candidate, error) {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true\n")
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true")
-	}
-
-	// fetch data from database
-	collection := client.Database("Otsimo").Collection("Candidates")
+	collection, ctx := connectDbToCollection("Candidates")
 	//fmt.Println(collection)
 
-	//defer client.Disconnect(ctx)
-	fmt.Printf("%T\n", _id)
+	// find candidate with _id to return
 	filterCursor, err := collection.Find(ctx, bson.M{"_id": _id})
 	if err != nil {
 		log.Fatal(err)
 	}
+	//fmt.Println(err)
 
+	// assign candidate's value in bson.M format to easily read.
 	var candidateFiltered []bson.M
 	if err = filterCursor.All(ctx, &candidateFiltered); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(candidateFiltered)
+	//fmt.Println(len(candidateFiltered))
+	cand := Candidate{}
+
+	// check if database dont have any candidate with given id then throw error "not found cadidate".
+	if len(candidateFiltered) == 0 {
+		return cand, errors.New("not found Candidate")
+	}
 
 	// I did this two variable because of GO throws panic.
 	meetingCount, _ := candidateFiltered[0]["meeting_count"].(int)
@@ -260,48 +242,30 @@ func ReadCandidate(_id string) (Candidate, error) {
 		next_meeting:  nextMeeting,
 		assignee:      candidateFiltered[0]["assignee"].(string),
 	}
-
 	return candidate, err
-}
 
-// completeMeeting yapınca meeting_count +=1 yap
-// 0<meeting_count<4 ise candidate.status='In Progress'
-// acceptCandidate olunca candidate.status='Accepted
-// denyCandiddate olunca candidate.staus='Denied'
-// arrangeMeeting olunca candidate.next_meeting = nextMeetingTime
+}
 
 // select a candidate with id and meeting_count added up 1.
 // if candidate's meeting_count is 4 then it's status be "In Progress" and assignee is Zafer who is CEO of Otsimo.
 func completeMeeting(_id string) error {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true\n")
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true")
-	}
-
-	collection := client.Database("Otsimo").Collection("Candidates")
+	collection, ctx := connectDbToCollection("Candidates")
 
 	var meet bson.M
-	if err = collection.FindOne(ctx, bson.M{"_id": _id}).Decode(&meet); err != nil {
-		log.Fatal(err)
+	if err := collection.FindOne(ctx, bson.M{"_id": _id}).Decode(&meet); err != nil {
+		//log.Fatal(err)
+		return errors.New("not found Candidate")
 	}
+
 	fmt.Println(meet["meeting_count"])
 
 	mCount, _ := meet["meeting_count"].(int32)
-	fmt.Println(mCount)
+	//fmt.Println(mCount)
+
 	//when meeting completed add +1 to meeting_count for candidate
 	mCount = mCount + 1
-	fmt.Println(mCount)
+	//fmt.Println(mCount)
 
 	//update candidate's meeting_count
 	result, err := collection.UpdateOne(
@@ -326,35 +290,19 @@ func completeMeeting(_id string) error {
 		}
 		fmt.Printf("Updated %v Documents!\n", resultStatus.ModifiedCount)
 	}
-
 	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
-
 	return err
+
 }
 
 // delete candidate from database with id
 func DeleteCandidate(_id string) error {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true\n")
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("true")
-	}
-
-	collection := client.Database("Otsimo").Collection("Candidates")
+	collection, ctx := connectDbToCollection("Candidates")
 
 	//check candidate with id then delete it from database
 	result, err := collection.DeleteOne(ctx, bson.M{"_id": _id})
-	fmt.Println(result)
+	fmt.Printf("Deleted %v Documents!\n", result.DeletedCount)
 	return err
 
 }
@@ -367,19 +315,7 @@ func ArrangeMeeting(_id string, nextMeetingTime *time.Time) error {
 
 	next_meeting = *nextMeetingTime
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	collection := client.Database("Otsimo").Collection("Candidates")
+	collection, ctx := connectDbToCollection("Candidates")
 
 	result, err := collection.UpdateOne(
 		ctx,
@@ -390,23 +326,13 @@ func ArrangeMeeting(_id string, nextMeetingTime *time.Time) error {
 	)
 	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
 	return err
+
 }
 
 // candidate's status be "Denied" with candidate's id
 func DenyCandidate(_id string) error {
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	collection := client.Database("Otsimo").Collection("Candidates")
+	collection, ctx := connectDbToCollection("Candidates")
 
 	result, err := collection.UpdateOne(
 		ctx,
@@ -417,52 +343,47 @@ func DenyCandidate(_id string) error {
 	)
 	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
 	return err
+
 }
 
 // candidate's status be "Accepted" with candidate's id
 func AcceptCandidate(_id string) error {
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
+
+	collection, ctx := connectDbToCollection("Candidates")
+
+	filterCursor, err := collection.Find(ctx, bson.M{"_id": _id})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
+	var candidateFiltered []bson.M
+	if err = filterCursor.All(ctx, &candidateFiltered); err != nil {
 		log.Fatal(err)
 	}
 
-	collection := client.Database("Otsimo").Collection("Candidates")
-
-	result, err := collection.UpdateOne(
-		ctx,
-		bson.M{"_id": _id},
-		bson.D{
-			{"$set", bson.D{{"status", "Accepted"}}},
-		},
-	)
-	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
+	// check candidate's meeting_cound and if value is equal or greater than four update candidate's
+	// status to "Accepted"
+	if candidateFiltered[0]["meeting_count"].(int32) >= 4 {
+		result, err := collection.UpdateOne(
+			ctx,
+			bson.M{"_id": _id},
+			bson.D{
+				{"$set", bson.D{{"status", "Accepted"}}},
+			},
+		)
+		fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
+		return err
+	} else {
+		err = errors.New("not accepted because of meeting count")
+	}
 	return err
+
 }
 
 // find assignee id with its name.
 func FindAssigneeIDByName(name string) string {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	collection := client.Database("Otsimo").Collection("Assignees")
+	collection, ctx := connectDbToCollection("Assignees")
 
 	// find assignee with name
 	filterCursor, err := collection.Find(ctx, bson.M{"name": name})
@@ -476,10 +397,35 @@ func FindAssigneeIDByName(name string) string {
 		log.Fatal(err)
 	}
 	fmt.Println(err)
+
 	if candidateFiltered == nil {
 		return "not found assignee with this name"
 	}
 	fmt.Println(candidateFiltered[0]["_id"])
 	return candidateFiltered[0]["_id"].(string)
 
+}
+
+// function takes collection name with type string and return collection.
+func connectDbToCollection(data string) (*mongo.Collection, context.Context) {
+
+	// connect localhost to fetch data
+	// we're configuring our client to use the correct URI, but we're not yet connecting to it.
+	client, err := mongo.NewClient(options.Client().ApplyURI(
+		"mongodb://localhost:27017"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// we can define a timeout duration that we want to use when trying to connect.
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// to fetch data from the requested database then return collection to use data for our needs.
+	collection := client.Database("Otsimo").Collection(data)
+	return collection, ctx
 }
