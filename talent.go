@@ -72,7 +72,7 @@ func main() {
 		fmt.Println(adayım.first_name, " ", adayım.last_name, " ", adayım.assignee)
 	}*/
 
-	//fmt.Println(completeMeeting("5b758c7d51d9590001def631"))
+	fmt.Println(completeMeeting("5fd89ef18e7ad22fb1c03438"))
 	//DeleteCandidate("5fd87b4c06fbdac6461d6cc1")
 	//FindAssigneeIDByName("Zafeer")
 	//fmt.Println(FindAssigneeIDByName("Mehmet"))
@@ -276,13 +276,28 @@ func completeMeeting(_id string) error {
 		},
 	)
 
-	// mCount == 4 that's mean status in progress and candidate's assignee be Zafer
-	if mCount >= 4 {
+	// check meeting count and status for candidate and update value if ensures statements.
+	if mCount > 0 && meet["status"] != "In Progress" {
 		resultStatus, err := collection.UpdateOne(
 			ctx,
 			bson.M{"_id": _id},
 			bson.D{
-				{"$set", bson.D{{"status", "In Progress"}, {"assignee", "5c191acea7948900011168d4"}}},
+				{"$set", bson.D{{"status", "In Progress"}}},
+			},
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Updated %v Documents!\n", resultStatus.ModifiedCount)
+	}
+
+	// mCount == 4 that's mean status that candidate's assignee be Zafer who is CEO of Otsimo
+	if mCount == 4 {
+		resultStatus, err := collection.UpdateOne(
+			ctx,
+			bson.M{"_id": _id},
+			bson.D{
+				{"$set", bson.D{{"assignee", "5c191acea7948900011168d4"}}},
 			},
 		)
 		if err != nil {
