@@ -48,8 +48,7 @@ import (
 //my code
 func main() {
 
-	// _id mongodb tarafından atanıyor dikkat et
-	/*aday := Candidate{
+	/*cand := Candidate{
 		first_name: "okan",
 		last_name:  "özşahin",
 		email:      "okan@gmail.com",
@@ -57,22 +56,22 @@ func main() {
 		university: "ODTU",
 		experience: true,
 	}
-	sonuc, err := CreateCandidate(aday)
+	result, err := CreateCandidate(cand)
 
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(sonuc.first_name, " ", sonuc.last_name, " ", sonuc.assignee)
+		fmt.Println(result.first_name, " ", result.last_name, " ", result.assignee)
 	}*/
 
-	/*adayım, err := ReadCandidate("5b758c7d51d9590001def631")
+	/*result, err := ReadCandidate("5b758c7d51d9590001def631")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(adayım.first_name, " ", adayım.last_name, " ", adayım.assignee)
+		fmt.Println(result.first_name, " ", result.last_name, " ", result.assignee)
 	}*/
 
-	fmt.Println(completeMeeting("5fd89ef18e7ad22fb1c03438"))
+	//fmt.Println(completeMeeting("5fd89ef18e7ad22fb1c03438"))
 	//DeleteCandidate("5fd87b4c06fbdac6461d6cc1")
 	//FindAssigneeIDByName("Zafeer")
 	//fmt.Println(FindAssigneeIDByName("Mehmet"))
@@ -80,7 +79,6 @@ func main() {
 	/*time := time.Now()
 	ArrangeMeeting("5fd89ef18e7ad22fb1c03438", &time)*/
 
-	//fmt.Println(sonuc.first_name)
 }
 
 //Candidates collection stores some required information of Candidates.
@@ -203,21 +201,19 @@ func CreateCandidate(candidate Candidate) (Candidate, error) {
 func ReadCandidate(_id string) (Candidate, error) {
 
 	collection, ctx := connectDbToCollection("Candidates")
-	//fmt.Println(collection)
 
 	// find candidate with _id to return
 	filterCursor, err := collection.Find(ctx, bson.M{"_id": _id})
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Println(err)
 
 	// assign candidate's value in bson.M format to easily read.
 	var candidateFiltered []bson.M
 	if err = filterCursor.All(ctx, &candidateFiltered); err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Println(len(candidateFiltered))
+
 	cand := Candidate{}
 
 	// check if database dont have any candidate with given id then throw error "not found cadidate".
@@ -254,7 +250,7 @@ func completeMeeting(_id string) error {
 
 	var meet bson.M
 	if err := collection.FindOne(ctx, bson.M{"_id": _id}).Decode(&meet); err != nil {
-		//log.Fatal(err)
+
 		return errors.New("not found Candidate")
 	}
 
